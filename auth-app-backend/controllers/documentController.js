@@ -187,4 +187,54 @@ exports.deleteDocument = async (req, res) => {
 
 
 
+// to get the user metrics for the documents
+exports.getUserDocumentMetrics = async (req, res) => {
+  try {
+    const userId = req.user.userId; // userId extracted from token
+    // Aggregate metrics for documents uploaded by this user
+    const metrics = await Document.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      {
+        $facet: {
+          totalUploads: [{ $count: "count" }],
+          monthlyUploads: [
+            {
+              $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$uploadedAt" } },
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { _id: 1 } }
+          ],
+          documentTypes: [
+            {
+              $project: {
+                extension: {
+                  $toLower: { $arrayElemAt: [{ $split: ["$fileUrl", "."] }, -1] }
+                }
+              }
+            },
+            {
+              $group: {
+                _id: "$extension",
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { count: -1 } }
+          ]
+        }
+      }
+    ]);
 
+    const result = {
+      totalUploads: metrics[0].totalUploads[0] ? metrics[0].totalUploads[0].count : 0,
+      monthlyUploads: metrics[0].monthlyUploads,
+      documentTypes: metrics[0].documentTypes
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching document metrics:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

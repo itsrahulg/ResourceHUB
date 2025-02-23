@@ -31,4 +31,7 @@ router.delete("/:id", authMiddleware, documentController.deleteDocument);
 router.get("/user", authMiddleware, documentController.getUserDocuments);
 
 
+// Get metrics for user documents
+router.get("/metrics", authMiddleware, documentController.getUserDocumentMetrics);
+
 module.exports = router;

@@ -10,6 +10,9 @@ const physicalResourceRoutes = require("./routes/physicalResourceRoutes");
 
 const documentRoutes = require("./routes/documentRoutes");
 
+
+
+
 dotenv.config();
 const app = express();
 
@@ -38,6 +41,9 @@ app.use("/api/document", documentRoutes);
 app.use("/documents", express.static("documents"));
 
 app.use("/api/documents", documentRoutes);
+
+
+
 
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {
