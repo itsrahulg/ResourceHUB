@@ -8,17 +8,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const { data } = await axios.post("http://localhost:5000/api/auth/login", { email, password });
-  //     localStorage.setItem("token", data.token);
-  //     navigate("/dashboard");
-  //   } catch (err) {
-  //     alert("Invalid credentials");
-  //   }
-  // };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -40,7 +29,7 @@ const Login = () => {
     <div style={styles.container}>
       {/* Navbar */}
       <nav style={styles.navbar}>
-        <div style={styles.navBrand}>ResourceHUB</div>
+        <div style={styles.navBrand}>Student Login</div>
         <div style={styles.navLinks}>
           <Link to="/" style={styles.navButton}>Home</Link>
           <Link to="/signup" style={styles.navButton}>Sign Up</Link>
@@ -83,6 +72,10 @@ const Login = () => {
             </form>
             <p style={styles.signupText}>
               Don't have an account? <Link to="/signup" style={styles.signupLink}>Sign up here</Link>
+            </p>
+
+            <p style={styles.signupText}>
+              Are you an Admin? <Link to="/admin/login" style={styles.signupLink}>Login here</Link>
             </p>
           </div>
         </div>

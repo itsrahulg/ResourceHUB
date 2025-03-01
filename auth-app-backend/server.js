@@ -10,7 +10,8 @@ const physicalResourceRoutes = require("./routes/physicalResourceRoutes");
 
 const documentRoutes = require("./routes/documentRoutes");
 
-
+const adminRoutes = require("./routes/adminRoutes");
+const userRoutes = require("./routes/userRoutes"); // new
 
 
 dotenv.config();
@@ -42,7 +43,8 @@ app.use("/documents", express.static("documents"));
 
 app.use("/api/documents", documentRoutes);
 
-
+app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
 
 
 app._router.stack.forEach((r) => {
