@@ -3,53 +3,40 @@ const path = require("path");
 const mongoose = require('mongoose');
 
 
-// Upload a document
+
+
+
 // exports.uploadDocument = async (req, res) => {
 //   try {
+//     console.log("📂 Upload request received:", req.body);
+
 //     const { title, department, semester, subject, description } = req.body;
 
 //     if (!req.file) {
-//       return res.status(400).json({ error: "File upload is required" });
+//       console.error("❌ No file uploaded");
+//       return res.status(400).json({ error: "No file uploaded" });
 //     }
 
-//     const document = new Document({
-//       title,
-//       department,
-//       semester,
-//       subject,
-//       description,
-//       fileUrl: `/documents/${req.file.filename}`, // Store file path
-//       user: req.user.id // ✅ Ensure this is stored!
-//     });
+//     console.log("✅ File uploaded:", req.file.filename);
 
-//     await document.save();
-//     res.status(201).json({ message: "Document uploaded successfully", document });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Server Error" });
-//   }
-// };
-
-// const uploadDocument = async (req, res) => {
-//   try {
-//     const { title, department, semester, subject, description } = req.body;
-//     const fileUrl = req.file.path; // Ensure multer stores the file
-
+//     // ✅ Fix: Set `userId` properly
 //     const newDocument = new Document({
 //       title,
 //       department,
 //       semester,
 //       subject,
 //       description,
-//       fileUrl,
-//       user: req.user.id // ✅ Ensure this is stored!
+//       fileUrl: req.file.path,
+//       userId: req.user.userId, // ✅ Ensure this is set
 //     });
 
 //     await newDocument.save();
-//     res.status(201).json({ message: "Document uploaded successfully", newDocument });
+//     console.log("📄 Document saved:", newDocument);
+//     res.status(201).json({ message: "Document uploaded successfully", document: newDocument });
+
 //   } catch (error) {
-//     console.error("Upload Error:", error);
-//     res.status(500).json({ message: "Server error" });
+//     console.error("❌ Error in uploadDocument:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
 //   }
 // };
 
@@ -67,26 +54,31 @@ exports.uploadDocument = async (req, res) => {
 
     console.log("✅ File uploaded:", req.file.filename);
 
-    // ✅ Fix: Set `userId` properly
     const newDocument = new Document({
       title,
       department,
       semester,
       subject,
       description,
-      fileUrl: req.file.path,
-      userId: req.user.userId, // ✅ Ensure this is set
+      // Replace backslashes with forward slashes in the file path
+      fileUrl: req.file.path.replace(/\\/g, "/"),
+      userId: req.user.userId,
     });
 
     await newDocument.save();
     console.log("📄 Document saved:", newDocument);
     res.status(201).json({ message: "Document uploaded successfully", document: newDocument });
-
   } catch (error) {
     console.error("❌ Error in uploadDocument:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
+
+
+
 
 // ✅ Ensure `getAllDocuments` is exported
 exports.getAllDocuments = async (req, res) => {
@@ -113,35 +105,6 @@ exports.getAllDocuments = async (req, res) => {
 
 
 
-// exports.getUserDocuments = async (req, res) => {
-//   try {
-//     console.log("✅ User ID from token:", req.user.userId);
-    
-//     const documents = await Document.find({ userId: req.user.userId });
-
-//     console.log("📄 Documents Found:", documents);
-//     res.json(documents);
-//   } catch (error) {
-//     console.error("❌ Error fetching user documents:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
-
-// exports.getUserDocuments = async (req, res) => {
-//   try {
-//     console.log("✅ User ID from token:", req.user.userId);
-    
-//     // Fetch documents where the user ID matches
-//     // const documents = await Document.find({ user: req.user.userId });
-//     const documents = await Document.find({ userId: new mongoose.Types.ObjectId(userId) });
-
-//     console.log("📄 Documents Found:", documents);
-//     res.json(documents);
-//   } catch (error) {
-//     console.error("❌ Error fetching user documents:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
 
 
 exports.getUserDocuments = async (req, res) => {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Footer from "./Footer";
+import jwt_decode from "jwt-decode"; // Install this using npm install jwt-decode
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,8 @@ const Login = () => {
       });
   
       localStorage.setItem("token", response.data.token); // ✅ Store token
+      localStorage.setItem("userId", response.data.userId);
+
       alert("Login successful!");
       navigate("/dashboard"); // Redirect to profile page
   

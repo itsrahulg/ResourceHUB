@@ -14,6 +14,10 @@ import UserDocumentsPage from "./UserDocumentsPage";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./AdminDashboard";
 import ManageRoles from "./ManageRoles";
+import PlayQuiz from "./PlayQuiz";
+import TopicSelection from "./components/TopicSelection";
+import QuizPage from "./components/QuizPage";
+
 
 function App() {
   return (
@@ -30,12 +34,19 @@ function App() {
         <Route path="/post-physical-resource" element={<PhysicalResourcePost />} />
         <Route path="/metrics" element={<Metrics />} />
         <Route path="/my-documents" element={<UserDocumentsPage />} />
+        <Route path="/quiz" element={<PlayQuiz />} />
+        <Route path="/" element={<TopicSelection />} />
+        <Route path="/quiz/:topic" element={<QuizPage />} />
+        
+
 
         <Route path="/admin/login" element={<AdminLogin />} />
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         <Route path="/admin/manage-roles" element={<ManageRoles />} />
+
+        
         
       </Routes>
     </Router>

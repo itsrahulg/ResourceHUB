@@ -7,21 +7,48 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
   Title,
   Tooltip,
   Legend,
   ArcElement,
+  PointElement,
 } from "chart.js";
-import "bootstrap/dist/css/bootstrap.min.css";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement
+);
 
 const UserDocumentMetrics = () => {
   const [metrics, setMetrics] = useState(null);
+  const [animatedCount, setAnimatedCount] = useState(0);
 
   useEffect(() => {
     fetchMetrics();
   }, []);
+
+  useEffect(() => {
+    if (metrics?.totalUploads) {
+      let count = 0;
+      const interval = setInterval(() => {
+        count += 1;
+        if (count > metrics.totalUploads) {
+          clearInterval(interval);
+        } else {
+          setAnimatedCount(count);
+        }
+      }, 50);
+      return () => clearInterval(interval);
+    }
+  }, [metrics]);
 
   const fetchMetrics = async () => {
     try {
@@ -39,93 +66,137 @@ const UserDocumentMetrics = () => {
     return <div>Loading metrics...</div>;
   }
 
-  // Prepare data for the monthly uploads bar chart
-  const monthlyLabels = metrics.monthlyUploads.map(item => item._id); // e.g., "2025-02"
-  const monthlyData = metrics.monthlyUploads.map(item => item.count);
+  // Generate all 12 months for the x-axis
+  const monthLabels = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  // Map API data to ensure missing months show 0
+  const monthlyData = new Array(12).fill(0);
+  metrics.monthlyUploads.forEach(({ _id, count }) => {
+    const monthIndex = parseInt(_id.split("-")[1], 10) - 1; // Convert "YYYY-MM" to month index
+    monthlyData[monthIndex] = count;
+  });
+
+  // Bar chart data
   const monthlyChartData = {
-    labels: monthlyLabels,
+    labels: monthLabels,
     datasets: [
       {
         label: "Uploads per Month",
         data: monthlyData,
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        backgroundColor: "white",
+        borderColor: "rgba(255, 255, 255, 0.8)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
       },
     ],
   };
 
-  // Prepare data for the document types pie chart
+  // Bar chart options
+  const monthlyChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, max: 15, ticks: { stepSize: 5 } },
+    },
+    plugins: {
+      legend: { display: false },
+    },
+  };
+
+  // Pie chart data
   const typeLabels = metrics.documentTypes.map(item => item._id.toUpperCase());
   const typeData = metrics.documentTypes.map(item => item.count);
   const typeChartData = {
-    labels: typeLabels,
+    labels: typeLabels.length ? typeLabels : ["No Data"],
     datasets: [
       {
         label: "Document Types",
-        data: typeData,
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-        ],
+        data: typeData.length ? typeData : [1],
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"],
       },
     ],
   };
 
   return (
-    <Container className="mt-4">
+    <Container fluid className="mt-4 d-flex flex-column align-items-center">
       
-      <Row>
-        {/* Monthly Uploads Bar Chart */}
-        <Col>
-          <Card className="shadow-sm mb-4 p-5">
+      {/* Monthly Uploads Bar Chart */}
+      <Row className="justify-content-center w-100">
+        <Col md={11}>
+          <Card className="shadow-lg p-4"
+            style={{
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #007bff, #00c6ff)", // Blue gradient
+              color: "white",
+            }}>
             <Card.Body style={{ height: "350px", padding: "1rem" }}>
-              <h5 className="text-center">Monthly Uploads</h5>
-              <Bar
-                data={monthlyChartData}
-                options={{ responsive: true, maintainAspectRatio: false }}
-              />
+              <h5 className="text-center">📊 Monthly Uploads</h5>
+              <Bar data={monthlyChartData} options={monthlyChartOptions} />
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      <Row className="mb-4">
-        {/* Left: Total Uploads (squarish) */}
-        <Col md={4}>
-          <Card className="shadow-sm p-4">
-            <Card.Body 
-              className="text-center d-flex flex-column justify-content-center" 
-              style={{ height: "250px" }}
-            >
-              <h2>Total Uploads 📤</h2>
-              <p style={{ fontSize: "2.5rem", fontWeight: "bold", margin: 0 }}>
-                {metrics.totalUploads}
+      {/* Total Uploads Count & Pie Chart */}
+      <Row className="mt-4 justify-content-center w-100">
+        
+        {/* Total Uploads */}
+        <Col md={5}>
+          <Card className="shadow-lg p-4"
+            style={{
+              borderRadius: "12px",
+              backgroundColor: "#fff",
+              height: "300px",
+            }}>
+            <Card.Body className="text-center d-flex flex-column justify-content-center">
+              <h4>Total Documents Uploaded 📂</h4>
+              <p style={{
+                fontSize: "4rem", // Larger Number
+                fontWeight: "bold",
+                margin: 0,
+                transition: "all 0.5s ease-out",
+              }}>
+                {animatedCount}
               </p>
             </Card.Body>
           </Card>
         </Col>
-        {/* Right: Document Types (Pie Chart) */}
-        <Col md={4}>
-          <Card className="shadow-sm p-4">
-            <Card.Body style={{ height: "250px", padding: "1rem" }}>
-              <h5 className="text-center">Document Types</h5>
-              <Pie
-                data={typeChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: "bottom" },
-                  },
-                  layout: { padding: 10 },
-                }}
-              />
+
+        {/* Pie Chart (Document Types) */}
+        <Col md={6}>
+          <Card className="shadow-lg p-4"
+            style={{
+              borderRadius: "12px",
+              backgroundColor: "#fff",
+              height: "300px",
+            }}>
+            <Card.Body className="d-flex align-items-center">
+              <Col md={6}>
+                <Pie data={typeChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              </Col>
+              <Col md={6} className="text-center">
+                <h5>📄 Document Types</h5>
+                <ul className="list-unstyled">
+                  {metrics.documentTypes.length > 0 ? (
+                    metrics.documentTypes.map((item, index) => (
+                      <li key={index} style={{ fontWeight: "bold" }}>
+                        {item._id}: {item.count}
+                      </li>
+                    ))
+                  ) : (
+                    <li style={{ fontWeight: "bold" }}>No Data</li>
+                  )}
+                </ul>
+              </Col>
             </Card.Body>
           </Card>
         </Col>
+
       </Row>
     </Container>
   );

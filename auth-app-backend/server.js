@@ -12,7 +12,7 @@ const documentRoutes = require("./routes/documentRoutes");
 
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes"); // new
-
+const quizRoutes = require("./routes/quizRoutes");
 
 dotenv.config();
 const app = express();
@@ -45,6 +45,12 @@ app.use("/api/documents", documentRoutes);
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
+
+app.use("/api/quiz", quizRoutes);
+
+const path = require("path");
+app.use("/documents", express.static(path.join(__dirname, "documents")));
+
 
 
 app._router.stack.forEach((r) => {

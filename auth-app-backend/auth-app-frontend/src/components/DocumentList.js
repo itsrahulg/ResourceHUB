@@ -79,11 +79,26 @@ const DocumentList = ({ documents }) => {
                 </Card.Text>
               </Card.Body>
               <Card.Footer className="text-center bg-white border-0">
-                <Button
+                {/* <Button
                   variant="primary"
                   href={`http://localhost:5000${doc.fileUrl}`}
-                  target="_blank"
+                  // target="_blank"
                   rel="noopener noreferrer"
+                  className="w-100"
+                >
+                  View Document
+                </Button> */}
+
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    const url = `http://localhost:5000/${doc.fileUrl}`; // Notice the slash after 5000/
+                    console.log("Opening document URL:", url);
+                    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+                    if (!newWindow) {
+                      console.error("Popup blocked. Please allow popups for this site.");
+                    }
+                  }}
                   className="w-100"
                 >
                   View Document

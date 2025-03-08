@@ -20,7 +20,7 @@ const Dashboard = () => {
         <div style={styles.navLinks}>
           <Link to="/digital-repository" style={styles.navButton}>Digital Repository</Link>
           <Link to="/physical-resources" style={styles.navButton}>Physical Resources</Link>
-          <Link to="/quiz-module" style={styles.navButton}>Play Quiz</Link>
+          <Link to="/quiz" style={styles.navButton}>Play Quiz</Link>
           <Link to="/profile" style={styles.navButton}>Profile</Link>
           <Link to="/metrics" style={styles.navButton}>Metrics</Link>
           
@@ -61,7 +61,7 @@ const Dashboard = () => {
                 <img src="/images/quiz-dashboard-card.jpg" alt="Quiz Module" className="card-img-top mb-3" />
                 <h5 className="card-title">Quiz Module</h5>
                 <p className="card-text">Test your knowledge with interactive quizzes.</p>
-                <Link to="/quiz-module" className="btn btn-primary">Start Quiz</Link>
+                <Link to="/quiz" className="btn btn-primary">Start Quiz</Link>
               </div>
             </div>
           </div>
