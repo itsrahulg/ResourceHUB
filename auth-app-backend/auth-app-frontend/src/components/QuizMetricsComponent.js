@@ -45,7 +45,7 @@ const QuizMetricsComponent = () => {
             {progress.length > 0 ? (
               progress.map((p, index) => (
                 <tr key={index}>
-                  <td>{p.topic || "Unknown"}</td> {/* ✅ Ensure topic is displayed */}
+                  <td>{p._id || "Unknown"}</td> {/* ✅ Ensure topic is displayed */}
                   <td>{p.quizzesTaken || 1}</td> {/* Default to 1 if missing */}
                   <td>{p.averageScore ? p.averageScore.toFixed(2) : "0.00"}</td>
                   <td>{p.highestScore || p.score || 0}</td> {/* Use highestScore, fallback to latest score */}
