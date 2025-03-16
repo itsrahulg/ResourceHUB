@@ -19,6 +19,7 @@ import TopicSelection from "./components/TopicSelection";
 import QuizPage from "./components/QuizPage";
 import AllRegisteredStudents from "./AllRegisteredStudents"; // ✅ Import the component
 import PlatformMetrics from "./PlatformMetrics";
+import ChatPage from "./ChatPage";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/quiz" element={<PlayQuiz />} />
         <Route path="/" element={<TopicSelection />} />
         <Route path="/quiz/:topic" element={<QuizPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         
 
 

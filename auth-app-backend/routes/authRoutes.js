@@ -101,6 +101,99 @@ const User = require("../models/User"); // Adjust the path if needed
 const router = express.Router();
 
 // User Signup Route
+// router.post("/signup", async (req, res) => {
+//   const { name, email, password, program, department, startYear, endYear } = req.body;
+
+//   try {
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: "User already exists" });
+//     }
+
+//     // Hash password
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, salt);
+
+//     const newUser = new User({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       program,
+//       department,
+//       startYear,
+//       endYear,
+//     });
+
+//     await newUser.save();
+
+//     // ✅ Generate JWT token including userId
+//     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+//       expiresIn: "1h",
+//     });
+
+//     // ✅ Send userId in response
+//     res.status(201).json({
+//       message: "User registered successfully",
+//       token,
+//       userId: newUser._id, // ✅ Ensure frontend can store it
+//     });
+
+//   } catch (err) {
+//     console.error("❌ Signup Error:", err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+// // User Login Route
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     // Check if user exists
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(400).json({ error: "Invalid email or password" });
+//     }
+
+//     // Check password
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(400).json({ error: "Invalid email or password" });
+//     }
+
+//     // ✅ Generate JWT token including userId
+//     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+//     // ✅ Send token as HTTP-only cookie
+//     res.cookie("token", token, {
+//       httpOnly: true, // Prevents client-side access (XSS protection)
+//       secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+//       sameSite: "Strict",
+//     });
+
+//     // ✅ Return token along with userId and details
+//     res.json({
+//       message: "Login successful",
+//       token, // ✅ Ensure frontend stores it properly
+//       userId: user._id, // ✅ This will be stored in localStorage
+//       user: {
+//         name: user.name,
+//         email: user.email,
+//         program: user.program,
+//         department: user.department,
+//         startYear: user.startYear,
+//         endYear: user.endYear,
+//       },
+//     });
+
+//   } catch (err) {
+//     console.error("❌ Login Error:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+
+// User Signup Route
 router.post("/signup", async (req, res) => {
   const { name, email, password, program, department, startYear, endYear } = req.body;
 
@@ -126,16 +219,19 @@ router.post("/signup", async (req, res) => {
 
     await newUser.save();
 
-    // ✅ Generate JWT token including userId
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    // ✅ Generate JWT token including userId and email
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // ✅ Send userId in response
+    // ✅ Send token + user details in response
     res.status(201).json({
       message: "User registered successfully",
       token,
-      userId: newUser._id, // ✅ Ensure frontend can store it
+      userId: newUser._id,
+      email: newUser.email, // ✅ Now frontend can store this
     });
 
   } catch (err) {
@@ -161,24 +257,28 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    // ✅ Generate JWT token including userId
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // ✅ Generate JWT token including userId and email
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // ✅ Send token as HTTP-only cookie
+    // ✅ Store the token in an HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true, // Prevents client-side access (XSS protection)
-      secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
     });
 
-    // ✅ Return token along with userId and details
+    // ✅ Send token + email back to the frontend
     res.json({
       message: "Login successful",
       token, // ✅ Ensure frontend stores it properly
-      userId: user._id, // ✅ This will be stored in localStorage
+      userId: user._id,
+      email: user.email, // ✅ Now frontend can store this
       user: {
         name: user.name,
-        email: user.email,
         program: user.program,
         department: user.department,
         startYear: user.startYear,
@@ -191,6 +291,9 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+
 
 module.exports = router;
 

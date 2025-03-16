@@ -58,6 +58,12 @@ app.use("/documents", express.static(path.join(__dirname, "documents")));
 
 app.use("/api/physical-resources", physicalResourceRoutes);
 
+
+app.use("/api/chat", require("./routes/chatRoutes"));
+
+
+
+
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {
     console.log("✅ Registered Route:", r.route.path);
