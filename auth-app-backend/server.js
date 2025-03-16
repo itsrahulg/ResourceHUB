@@ -13,6 +13,8 @@ const documentRoutes = require("./routes/documentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes"); // new
 const quizRoutes = require("./routes/quizRoutes");
+const authenticate = require("./middleware/authMiddleware");
+
 
 dotenv.config();
 const app = express();
@@ -48,10 +50,13 @@ app.use("/api/users", userRoutes);
 
 app.use("/api/quiz", quizRoutes);
 
+
+app.use("/api/admin", adminRoutes);
+
 const path = require("path");
 app.use("/documents", express.static(path.join(__dirname, "documents")));
 
-
+app.use("/api/physical-resources", physicalResourceRoutes);
 
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {

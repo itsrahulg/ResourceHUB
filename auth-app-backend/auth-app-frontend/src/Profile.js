@@ -62,7 +62,7 @@ const Profile = () => {
 
   return (
     <div>
-      <NormalNavbar title="User Profile" buttons={[{ label: "Dashboard", path: "/dashboard" },{ label: "My Documents", path: "/my-documents" }, { label: "Logout", path: "/" }]} />
+      <NormalNavbar title="User Profile" buttons={[{ label: "Dashboard", path: "/dashboard" },{ label: "My Uploads", path: "/my-documents" }, { label: "Logout", path: "/" }]} />
 
         {/*  
 

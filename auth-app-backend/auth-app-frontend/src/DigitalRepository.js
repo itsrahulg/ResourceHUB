@@ -6,6 +6,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const DigitalRepository = () => {
   const [documents, setDocuments] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [filters, setFilters] = useState({
     departments: [],
     semester: [],
@@ -100,7 +102,8 @@ const DigitalRepository = () => {
   return (
     <div style={styles.digitalRepository}>
       {/* Navbar (Fixed at the top) */}
-      <Navbar title="Digital Repository" buttons={[{ label: "Dashboard", path: "/dashboard" }]} />
+      <Navbar title="Digital Repository" buttons={[{ label: "Dashboard", path: "/dashboard" }]} onSearchChange={(term) => setSearchTerm(term)} />
+      
 
       {/* Main Content */}
       <div style={styles.contentWrapper}>

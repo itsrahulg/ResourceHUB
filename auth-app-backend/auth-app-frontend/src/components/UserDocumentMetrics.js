@@ -135,7 +135,7 @@ const UserDocumentMetrics = () => {
               color: "white",
             }}>
             <Card.Body style={{ height: "350px", padding: "1rem" }}>
-              <h5 className="text-center">📊 Monthly Uploads</h5>
+              <h5 className="text-center">📊 Monthly Document Uploads</h5>
               <Bar data={monthlyChartData} options={monthlyChartOptions} />
             </Card.Body>
           </Card>

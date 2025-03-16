@@ -17,7 +17,8 @@ import ManageRoles from "./ManageRoles";
 import PlayQuiz from "./PlayQuiz";
 import TopicSelection from "./components/TopicSelection";
 import QuizPage from "./components/QuizPage";
-
+import AllRegisteredStudents from "./AllRegisteredStudents"; // ✅ Import the component
+import PlatformMetrics from "./PlatformMetrics";
 
 function App() {
   return (
@@ -40,13 +41,17 @@ function App() {
         
 
 
+
+
         <Route path="/admin/login" element={<AdminLogin />} />
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         <Route path="/admin/manage-roles" element={<ManageRoles />} />
 
-        
+        <Route path="/admin/all-registered-students" element={<AllRegisteredStudents />} />
+
+        <Route path="/admin/platform-metrics" element={<PlatformMetrics />} />
         
       </Routes>
     </Router>

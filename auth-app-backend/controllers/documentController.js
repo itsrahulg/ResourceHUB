@@ -201,3 +201,24 @@ exports.getUserDocumentMetrics = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+
+
+exports.uploadDocument = async (req, res) => {
+  try {
+    const newDocument = new Document(req.body);
+    await newDocument.save();
+
+    // Update total documents ever uploaded count
+    await GlobalMetrics.findOneAndUpdate(
+      { key: "totalDocumentsEver" },
+      { $inc: { count: 1 } },
+      { upsert: true, new: true }
+    );
+
+    res.status(201).json({ message: "Document uploaded successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error uploading document" });
+  }
+};

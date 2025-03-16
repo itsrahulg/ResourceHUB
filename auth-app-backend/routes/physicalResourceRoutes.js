@@ -1,100 +1,12 @@
-// const express = require("express");
-// const multer = require("multer");
-// const fs = require("fs");
-// const path = require("path");
-// const PhysicalResource = require("../models/PhysicalResource");
-// const authMiddleware = require("../middleware/authMiddleware");
-
-// const router = express.Router();
-
-// // Ensure the physicalresource directory exists
-// const uploadDir = "physicalresource/";
-// if (!fs.existsSync(uploadDir)) {
-//   fs.mkdirSync(uploadDir, { recursive: true });
-// }
-
-// // Multer Storage Configuration
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, uploadDir); // Save in physicalresource folder
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
-//   },
-// });
-
-// // File filter to allow only images
-// const fileFilter = (req, file, cb) => {
-//   const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-//   if (allowedTypes.includes(file.mimetype)) {
-//     cb(null, true);
-//   } else {
-//     cb(new Error("Only JPEG, PNG, and JPG files are allowed!"), false);
-//   }
-// };
-
-// // Multer upload setup with limits
-// const upload = multer({
-//   storage: storage,
-//   fileFilter: fileFilter,
-//   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
-// });
-
-// // POST API: Upload Physical Resource
-// router.post("/upload", authMiddleware, upload.single("photo"), async (req, res) => {
-//   try {
-//     const { title, department, semester, subject, description, availability, lendingDays } = req.body;
-
-//     if (!req.file) {
-//       return res.status(400).json({ error: "Photo upload is required" });
-//     }
-
-//     const resource = new PhysicalResource({
-//       title,
-//       department,
-//       semester,
-//       subject,
-//       description,
-//       availability,
-//       lendingDays: availability === "For Lending" ? lendingDays : null,
-//       photo: `/physicalresource/${req.file.filename}`, // Store only the file path
-//       postedBy: req.user.id,
-//     });
-
-//     await resource.save();
-//     res.status(201).json({ message: "Physical Resource Posted Successfully", resource });
-//   } catch (error) {
-//     console.error("Upload Error:", error);
-//     res.status(500).json({ error: "Server Error while uploading resource" });
-//   }
-// });
-
-// // GET API: Fetch All Physical Resources
-// router.get("/all", async (req, res) => {
-//   try {
-//     const resources = await PhysicalResource.find().populate("postedBy", "name email");
-//     res.status(200).json(resources);
-//   } catch (error) {
-//     console.error("Fetch Error:", error);
-//     res.status(500).json({ error: "Error fetching resources" });
-//   }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const PhysicalResource = require("../models/PhysicalResource");
 const authMiddleware = require("../middleware/authMiddleware");
-
+const verifyToken = require("../middleware/authMiddleware");
 const router = express.Router();
+// const authenticate = require("../middleware/authenticate");
 
 // Ensure the physicalresource directory exists
 const uploadDir = "physicalresource/";
@@ -130,80 +42,50 @@ const upload = multer({
 }).array("photos", 5); // Allow multiple file uploads
 
 // POST API: Upload Physical Resource
-// router.post("/upload", authMiddleware, (req, res) => {
-//   upload(req, res, async (err) => {
-//     if (err) {
-//       return res.status(400).json({ error: err.message });
-//     }
-
-//     try {
-//       const { title, department, semester, subject, description, availability, lendingDays, mobileNumber } = req.body;
-
-//       if (!req.files || req.files.length === 0) {
-//         return res.status(400).json({ error: "At least one photo is required" });
-//       }
-
-//       if (!req.user || !req.user.email) {
-//         return res.status(400).json({ error: "User email is missing. Ensure you are logged in." });
-//       }
-
-//       // Get all uploaded image URLs
-//       const photoUrls = req.files.map(file => `/physicalresource/${file.filename}`);
-
-//       const resource = new PhysicalResource({
-//         title,
-//         department,
-//         semester,
-//         subject,
-//         description,
-//         availability,
-//         lendingDays: availability === "For Lending" ? lendingDays : null,
-//         photos: photoUrls,
-//         mobileNumber,
-//         email: req.user.email, // ✅ This ensures the email is set
-//         postedBy: req.user.id,
-//       });
-
-//       await resource.save();
-//       res.status(201).json({ message: "Physical Resource Posted Successfully", resource });
-//     } catch (error) {
-//       console.error("Upload Error:", error);
-//       res.status(500).json({ error: "Server Error while uploading resource" });
-//     }
-//   });
-// });
-
-router.post("/upload", authMiddleware, upload.array("photos", 5), async (req, res) => {
-  try {
-    const { title, department, semester, subject, description, availability, lendingDays, mobileNumber } = req.body;
-
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "At least one photo is required" });
+router.post("/upload", authMiddleware, (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
     }
 
-    const photoPaths = req.files.map((file) => `/physicalresource/${file.filename}`);
+    try {
+      const { title, department, semester, subject, description, availability, lendingDays, mobileNumber } = req.body;
 
-    const resource = new PhysicalResource({
-      title,
-      department,
-      semester,
-      subject,
-      description,
-      availability,
-      lendingDays: availability === "For Lending" ? lendingDays : null,
-      photos: photoPaths,
-      mobileNumber,
-      email: req.user.email, // ✅ Ensure email is stored
-      postedBy: req.user.id, // ✅ Store the logged-in user's ID
-    });
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: "At least one photo is required" });
+      }
 
-    await resource.save();
-    res.status(201).json({ message: "Physical Resource Posted Successfully", resource });
-  } catch (error) {
-    console.error("Upload Error:", error);
-    res.status(500).json({ error: "Server Error while uploading resource" });
-  }
+      if (!req.user || !req.user.email) {
+        return res.status(400).json({ error: "User email is missing. Ensure you are logged in." });
+      }
+
+      // Get all uploaded image URLs
+      const photoUrls = req.files.map(file => `/physicalresource/${file.filename}`);
+
+      const resource = new PhysicalResource({
+        title,
+        department,
+        semester,
+        subject,
+        description,
+        availability,
+        lendingDays: availability === "For Lending" ? lendingDays : null,
+        photos: photoUrls,
+        mobileNumber,
+        email: req.user.email, // ✅ This ensures the email is set
+        postedBy: req.user.id,
+      });
+
+      await resource.save();
+      res.status(201).json({ message: "Physical Resource Posted Successfully", resource });
+    } catch (error) {
+      console.error("Upload Error:", error);
+      res.status(500).json({ error: "Server Error while uploading resource" });
+    }
+  });
 });
+
+
 
 
 
@@ -287,6 +169,89 @@ router.get("/count/:userId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error while fetching count" });
   }
 });
+
+
+
+
+// GET Physical Resource Metrics
+router.get("/metrics", verifyToken, async (req, res) => {
+  try {
+    const userEmail = req.user.email; // Get email from token
+
+    // 1️⃣ Count total physical resources uploaded by the user
+    const totalUploads = await PhysicalResource.countDocuments({ email: userEmail });
+
+    // 2️⃣ Count flagged physical resources
+    const flaggedResources = await PhysicalResource.countDocuments({ email: userEmail, flagged: true });
+
+    // 3️⃣ Count monthly uploads
+    const monthlyUploads = await PhysicalResource.aggregate([
+      {
+        $match: { email: userEmail },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" }, // Group by month
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by month
+    ]);
+
+    // Ensure all 12 months are present
+    const monthlyData = new Array(12).fill(0);
+    monthlyUploads.forEach(({ _id, count }) => {
+      monthlyData[_id - 1] = count; // Convert month index
+    });
+
+    res.json({
+      totalUploads: totalUploads || 0,
+      flaggedResources: flaggedResources || 0,
+      monthlyUploads: monthlyData,
+    });
+  } catch (error) {
+    console.error("Error fetching metrics:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
+
+
+// Get all physical resources posted by the authenticated user
+router.get("/user", authMiddleware, async (req, res) => {
+  try {
+      const userEmail = req.user.email; // Fetching email from authenticated user
+      const resources = await PhysicalResource.find({ email: userEmail });
+      res.json(resources);
+  } catch (error) {
+      console.error("Error fetching user physical resources:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a physical resource post
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+      const resource = await PhysicalResource.findById(req.params.id);
+      if (!resource) {
+          return res.status(404).json({ message: "Resource not found" });
+      }
+      
+      if (resource.email !== req.user.email) {
+          return res.status(403).json({ message: "Unauthorized action" });
+      }
+      
+      await PhysicalResource.findByIdAndDelete(req.params.id);
+      res.json({ message: "Resource deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting resource:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 
 

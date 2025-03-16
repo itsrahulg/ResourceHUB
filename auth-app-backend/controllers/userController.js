@@ -1,3 +1,6 @@
+const GlobalMetrics = require("../models/GlobalMetrics");
+
+
 exports.getUserStats = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -13,5 +16,24 @@ exports.getUserStats = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user stats:", error);
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+exports.registerUser = async (req, res) => {
+  try {
+    const newUser = new User(req.body);
+    await newUser.save();
+
+    // Update total users ever registered count
+    await GlobalMetrics.findOneAndUpdate(
+      { key: "totalUsersEver" },
+      { $inc: { count: 1 } },
+      { upsert: true, new: true }
+    );
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error registering user" });
   }
 };
